@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import './App.css';
 import Lobby from 'Components/Lobby';
+import Chat  from 'Components/Chat';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App =() => {
@@ -19,6 +20,7 @@ const App =() => {
           });
           _cnn.on("UsersInRoom",(users)=>{
             setUsers(users);
+            console.log(users);
           });
           _cnn.onclose(e=>{
             setConnection();
@@ -35,11 +37,32 @@ const App =() => {
      
 
   };
+
+  const sendMessage = async(message) =>{
+    try {
+      await connection.invoke("SendMessage",message);
+    } catch (error) {
+      console.log(error);
+    }
+   
+  };
+
+  const leaveRoom = async() =>{
+    try {
+      await connection.stop();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="app">
         <h2>MyChat</h2>
        <hr className='line' />
+       {!connection ?
        <Lobby joinRoom={joinRoom} />
+       :
+       <Chat users={users} messages={messages} sendMessage={sendMessage} leaveRoom={leaveRoom} />
+       }
     </div>
   );
 }
